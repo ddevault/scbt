@@ -1,5 +1,6 @@
 import asyncio
 import shlex
+import scbt.bt as bt
 
 # TODO: Authentication
 class SCBTProtocol(asyncio.Protocol):
@@ -16,8 +17,8 @@ class SCBTProtocol(asyncio.Protocol):
             self.execute(shlex.split(command))
 
     def execute(self, command):
-        print("Got command: {}".format(", ".join(command)))
-        self.send("Got command: {}".format(", ".join(command)))
+        self.send(bt.execute(command))
 
     def send(self, s):
-        self.transport.write(s.encode("utf-8"))
+        if s:
+            self.transport.write(s.encode("utf-8"))
