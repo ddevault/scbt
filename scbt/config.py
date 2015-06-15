@@ -1,18 +1,7 @@
-import logging
 import os
 import sys
 
 from configparser import ConfigParser
-
-logger = logging.getLogger("scbt")
-logger.setLevel(logging.DEBUG)
-
-sh = logging.StreamHandler()
-sh.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-sh.setFormatter(formatter)
-
-logger.addHandler(sh)
 
 config_paths = ["/etc/scbt.conf", "scbt.conf"]
 
