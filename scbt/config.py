@@ -2,7 +2,7 @@ import os
 import sys
 from configparser import ConfigParser
 
-config_paths = ["scbt.conf", "/etc/scbt.conf"]
+config_paths = ["/etc/scbt.conf"]
 
 config = ConfigParser()
 

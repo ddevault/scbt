@@ -32,7 +32,7 @@ def status(session, payload):
         "session": {
             "total_download": status.total_download,
             "total_upload": status.total_upload,
-            "ratio": status.total_download / status.total_upload \
+            "ratio": status.total_upload / status.total_download \
                 if status.total_upload != 0 else 0,
             "num_peers": status.num_peers,
             "download_rate": status.download_rate,

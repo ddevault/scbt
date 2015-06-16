@@ -35,6 +35,8 @@ def daemon(fork):
 @click.argument('f', type=click.Path(exists=True))
 @click.option("--paused", default=False, is_flag=True)
 def add(f, paused):
+    if not os.path.isabs(f):
+        f = os.path.join(os.getcwd(), f)
     payload = {
         "paused": paused,
         "path": f
@@ -43,7 +45,7 @@ def add(f, paused):
     if output["success"]:
         sys.stdout.write("Added {}\n".format(output["info_hash"]))
     else:
-        sys.stderr.write("Error: {}\n", output["error"])
+        sys.stderr.write("Error: {}\n".format(output["error"]))
 
 def meta_status(status, torrents):
     print("scbt is running on pid {} (running for {} seconds)"\
@@ -51,8 +53,8 @@ def meta_status(status, torrents):
     print(":: [{} downloading] [{} seeding] [{} idle]"\
         .format(status["downloading"], status["seeding"], status["idle"]))
     print(":: [{} kb/s up] [{} kb/s down] [{} peers] [{:.2f} ratio]"\
-        .format(status["session"]["upload_rate"],
-            status["session"]["download_rate"],
+        .format(status["session"]["upload_rate"] / 1000,
+            status["session"]["download_rate"] / 1000,
             status["session"]["num_peers"],
             status["session"]["ratio"]))
     for torrent in torrents["torrents"]:
