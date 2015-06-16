@@ -5,6 +5,7 @@ import sys
 from scbt.logging import log
 from scbt.daemon import daemon as _daemon
 from scbt.client import send_action
+from scbt.common import chunks
 
 @click.group(invoke_without_command=True)
 @click.pass_context
@@ -56,6 +57,31 @@ def status(what, daemon):
     else:
         # Show status for what
         pass
+
+@cli.command(help="List torrents loaded on daemon")
+def list():
+    status = send_action("status")
+    response = send_action("list_torrents")
+    print("[{} downloading] [{} seeding] [{} idle]"\
+        .format(status["downloading"], status["seeding"], status["idle"]))
+    for torrent in response["torrents"]:
+        print("")
+        print("{}".format(torrent["name"]))
+        state = torrent["state"]
+        state = state[0:1].upper() + state[1:]
+        if state == "Downloading":
+            print(":: {} since {} ({:.0f}%)".format(state, "TODO", torrent["progress"]))
+        print(":: Info hash: {}".format(torrent["info_hash"]))
+        total = len(torrent["pieces"])
+        sys.stdout.write(":: Progress:\n:: [")
+        for pieces in chunks(torrent["pieces"], int(total / 49)):
+            if all(pieces):
+                sys.stdout.write(":")
+            elif any(pieces):
+                sys.stdout.write(".")
+            else:
+                sys.stdout.write(" ")
+        sys.stdout.write("]\n")
 
 if __name__ == '__main__':
     cli()

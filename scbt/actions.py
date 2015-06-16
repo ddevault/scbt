@@ -19,8 +19,8 @@ def add_torrent(payload):
         return { "success": False, "error": "'path' is required" }
     if not os.path.exists(path):
         return { "success": False, "error": "File not found" }
-    h, t = session.add_torrent(path)
-    return { "success": True, "info_hash": h }
+    t = session.add_torrent(path)
+    return { "success": True, "info_hash": t.info_hash }
 
 @action
 def status(payload):
@@ -43,3 +43,9 @@ def status(payload):
         }
     }
     return response
+
+@action
+def list_torrents(payload):
+    return {
+        "torrents": [v.json() for k, v in session.torrents.items()]
+    }
