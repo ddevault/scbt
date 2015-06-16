@@ -29,6 +29,6 @@ def send_command(cmd):
         c = loop.create_connection(lambda: client, iface, port)
     return loop.run_until_complete(wait(c, future))
 
-def send_action(action, payload):
+def send_action(action, payload={}):
     payload["action"] = action
     return json.loads(send_command(json.dumps(payload)))

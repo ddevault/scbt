@@ -40,12 +40,19 @@ def add(f, paused):
 @click.argument('what', nargs=-1)
 @click.option('--daemon', default=False, is_flag=True)
 def status(what, daemon):
-    cwd = os.getcwd()
-    # TODO: See if cwd is a download target
+    cwd = os.getcwd() # TODO: See if cwd is a download target
+
     if len(what) == 0:
-        # Show general status
-        output = send_command("status")
-        sys.stdout.write(output)
+        output = send_action("status")
+        print("scbt is running on pid {} (running for {} seconds)"\
+            .format(output["session"]["pid"], output["session"]["uptime"]))
+        print(":: [{} downloading] [{} seeding] [{} idle]"\
+            .format(output["downloading"], output["seeding"], output["idle"]))
+        print(":: [{} kb/s up] [{} kb/s down] [{} peers] [{} ratio]"\
+            .format(output["session"]["upload_rate"],
+                output["session"]["download_rate"],
+                output["session"]["num_peers"],
+                output["session"]["ratio"]))
     else:
         # Show status for what
         pass
