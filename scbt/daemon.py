@@ -1,7 +1,8 @@
 import asyncio
 import os, pwd, grp
-from scbt.protocol import SCBTProtocol
+from scbt.protocol import SCBTServer
 from scbt.config import _cfg
+from scbt.session import session
 
 uid = os.getuid()
 gid = os.getgid()
@@ -21,7 +22,7 @@ def daemon():
     usock = None
     if ep.startswith("unix://"):
         path = ep[len("unix://"):]
-        s = loop.create_unix_server(SCBTProtocol, path=path)
+        s = loop.create_unix_server(SCBTServer, path=path)
         usock = path
     elif ep.startswith("tcp://"):
         parts = ep[len("tcp://"):].split(":")
@@ -30,7 +31,7 @@ def daemon():
             port = int(parts[1])
         else:
             port = 50932
-        s = loop.create_server(SCBTProtocol, iface, port)
+        s = loop.create_server(SCBTServer, iface, port)
     server = loop.run_until_complete(s)
     if usock:
         os.chmod(usock, 0o775)
