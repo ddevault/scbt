@@ -1,5 +1,6 @@
 import libtorrent as lt
 import binascii
+import os
 from datetime import datetime
 from scbt.config import _cfg
 from scbt.logging import log
@@ -37,7 +38,8 @@ class Torrent():
             "num_peers": s.num_peers,
             "priority": s.priority,
             "current_tracker": s.current_tracker,
-            "trackers": self.torrent.trackers()
+            "trackers": self.torrent.trackers(),
+            "path": os.path.realpath(self.torrent.save_path())
         }
 
 class Session():

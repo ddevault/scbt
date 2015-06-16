@@ -49,3 +49,9 @@ def list_torrents(payload):
     return {
         "torrents": [v.json() for k, v in session.torrents.items()]
     }
+
+# TODO: Remove this before releasing scbt
+@action
+def interact(payload):
+    import code
+    code.interact(local=locals())

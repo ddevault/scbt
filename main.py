@@ -13,7 +13,7 @@ def cli(ctx):
     if ctx.invoked_subcommand is None:
         status([])
 
-@cli.command(help="Runs the scbt daemon.")
+@cli.command(help="Runs the scbt daemon")
 @click.option("--fork", default=False, is_flag=True)
 def daemon(fork):
     if fork:
@@ -48,7 +48,7 @@ def meta_status(status, torrents):
             status["session"]["num_peers"],
             status["session"]["ratio"]))
     for torrent in torrents["torrents"]:
-        print("")
+        print()
         print("{}".format(torrent["name"]))
         state = torrent["state"]
         state = state[0:1].upper() + state[1:]
@@ -66,19 +66,56 @@ def meta_status(status, torrents):
                 sys.stdout.write(" ")
         sys.stdout.write("]\n")
 
+def torrent_status(torrents):
+    for torrent in torrents:
+        if torrent != torrents[0]:
+            print()
+        print("{}".format(torrent["name"]))
+        print()
+        state = torrent["state"]
+        state = state[0:1].upper() + state[1:]
+        if state == "Downloading":
+            print("{} since {} ({:.0f}%)".format(state, "TODO", torrent["progress"]))
+        print("Info hash: {}".format(torrent["info_hash"]))
+        total = len(torrent["pieces"])
+        sys.stdout.write("Progress:\n[")
+        for pieces in chunks(torrent["pieces"], int(total / 49)):
+            if all(pieces):
+                sys.stdout.write(":")
+            elif any(pieces):
+                sys.stdout.write(".")
+            else:
+                sys.stdout.write(" ")
+        sys.stdout.write("]\n")
+
 @cli.command(help="Show status information")
 @click.argument('what', nargs=-1)
-@click.option('--daemon', default=False, is_flag=True)
-def status(what, daemon):
-    cwd = os.getcwd() # TODO: See if cwd is a download target
+@click.option('--show-all', default=False, is_flag=True)
+def status(what, show_all):
+    cwd = os.getcwd()
     status = send_action("status")
     torrents = send_action("list_torrents")
 
-    if len(what) == 0:
-        meta_status(status, torrents)
+    matching = [t for t in torrents["torrents"] \
+        if t["info_hash"] in list(what) \
+            or t["path"] in [os.path.realpath(p) for p in what] \
+            or (t["path"] == cwd and len(what) == 0)]
+
+    if any(matching) and not show_all:
+        if len(what) == 0:
+            print("Only showing torrents being downloaded to this directory")
+            print("Override this behavior with --show-all")
+            print()
+        if len(matching) > 1:
+            meta_status(status, torrents)
+        else:
+            torrent_status(matching)
     else:
-        # what_status(status, torrents) # TODO
-        pass
+        meta_status(status, torrents)
+
+@cli.command(help="Run interactive console on daemon")
+def interact():
+    send_action("interact")
 
 if __name__ == '__main__':
     cli()
