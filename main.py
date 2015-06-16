@@ -63,7 +63,7 @@ def meta_status(status, torrents):
         state = torrent["state"]
         state = state[0:1].upper() + state[1:]
         if state == "Downloading":
-            print(":: {} since {} ({:.0f}%)".format(state, "TODO", torrent["progress"]))
+            print(":: {} since {} ({:.0f}%)".format(state, "TODO", torrent["progress"] * 100))
         print(":: Info hash: {}".format(torrent["info_hash"]))
         total = len(torrent["pieces"])
         sys.stdout.write(":: Progress:\n:: [")
@@ -85,7 +85,7 @@ def torrent_status(torrents):
         state = torrent["state"]
         state = state[0:1].upper() + state[1:]
         if state == "Downloading":
-            print("{} since {} ({:.0f}%)".format(state, "TODO", torrent["progress"]))
+            print("{} since {} ({:.0f}%)".format(state, "TODO", torrent["progress"] * 100))
         print("Info hash: {}".format(torrent["info_hash"]))
         total = len(torrent["pieces"])
         sys.stdout.write("Progress:\n[")
