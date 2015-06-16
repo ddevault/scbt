@@ -3,14 +3,14 @@ import json
 from scbt.logging import log
 from scbt.actions import actions
 
-def execute(payload):
+def execute(session, payload):
     action = payload.get("action")
     if not action:
         return "'action' is requried\n"
     _action = actions.get(action)
     if not _action:
         return "Unknown action '{}'\n".format(action)
-    return _action(payload)
+    return _action(session, payload)
 
 # TODO: Authentication
 class SCBTServer(asyncio.Protocol):
@@ -33,7 +33,7 @@ class SCBTServer(asyncio.Protocol):
             self.execute(payload)
 
     def execute(self, payload):
-        self.send(json.dumps(execute(payload)) + "\n")
+        self.send(json.dumps(execute(self.session, payload)) + "\n")
 
     def send(self, s):
         if s:

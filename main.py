@@ -8,8 +8,16 @@ from scbt.client import send_action
 from scbt.common import chunks
 
 @click.group(invoke_without_command=True)
+@click.option("--config", default=None, type=click.Path(exists=True))
 @click.pass_context
-def cli(ctx):
+def cli(ctx, config):
+    from scbt.config import load_config, load_default_config
+    if config:
+        if not load_config(config):
+            sys.stderr.write("Unable to load config '{}'\n".format(config))
+            sys.exit(1)
+    else:
+        load_default_config()
     if ctx.invoked_subcommand is None:
         status([])
 

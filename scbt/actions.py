@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 from functools import wraps
-from scbt.session import session
 
 actions = dict()
 
@@ -13,7 +12,7 @@ def action(f):
     return wrapper
 
 @action
-def add_torrent(payload):
+def add_torrent(session, payload):
     path = payload.get("path")
     if not path:
         return { "success": False, "error": "'path' is required" }
@@ -23,7 +22,7 @@ def add_torrent(payload):
     return { "success": True, "info_hash": t.info_hash }
 
 @action
-def status(payload):
+def status(session, payload):
     status = session.status()
     tstatus = [v.status() for k, v in session.torrents.items()]
     response = {
@@ -45,13 +44,13 @@ def status(payload):
     return response
 
 @action
-def list_torrents(payload):
+def list_torrents(session, payload):
     return {
         "torrents": [v.json() for k, v in session.torrents.items()]
     }
 
 # TODO: Remove this before releasing scbt
 @action
-def interact(payload):
+def interact(session, payload):
     import code
     code.interact(local=locals())

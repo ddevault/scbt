@@ -72,4 +72,4 @@ class Session():
         log.info("Added torrent {} - {}".format(torrent.info_hash, torrent.name))
         return torrent
 
-session = Session()
+session = None
