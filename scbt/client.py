@@ -1,4 +1,5 @@
 import asyncio
+import json
 from scbt.config import _cfg
 from scbt.protocol import SCBTOneOffClient
 
@@ -27,3 +28,7 @@ def send_command(cmd):
             port = 50932
         c = loop.create_connection(lambda: client, iface, port)
     return loop.run_until_complete(wait(c, future))
+
+def send_action(action, payload):
+    payload["action"] = action
+    return json.loads(send_command(json.dumps(payload)))

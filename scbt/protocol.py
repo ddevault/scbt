@@ -1,7 +1,16 @@
 import asyncio
-import shlex
-import scbt.bt as bt
+import json
 from scbt.logging import log
+from scbt.actions import actions
+
+def execute(payload):
+    action = payload.get("action")
+    if not action:
+        return "'action' is requried\n"
+    _action = actions.get(action)
+    if not _action:
+        return "Unknown action '{}'\n".format(action)
+    return _action(payload)
 
 # TODO: Authentication
 class SCBTServer(asyncio.Protocol):
@@ -9,17 +18,22 @@ class SCBTServer(asyncio.Protocol):
 
     def connection_made(self, transport):
         self.transport = transport
-        log.info("Connection made")
 
     def data_received(self, data):
         self.buf += data.decode("utf-8")
         while '\n' in self.buf:
-            command = self.buf[:self.buf.index('\n')]
+            j = self.buf[:self.buf.index('\n')]
             self.buf = self.buf[self.buf.index('\n') + 1:]
-            self.execute(shlex.split(command))
+            try:
+                payload = json.loads(j)
+            except ValueError:
+                self.send("Error: invalid JSON\n")
+                self.transport.close()
+                return
+            self.execute(payload)
 
-    def execute(self, command):
-        self.send(bt.execute(command))
+    def execute(self, payload):
+        self.send(json.dumps(execute(payload)) + "\n")
 
     def send(self, s):
         if s:
