@@ -37,34 +37,17 @@ def add(f, paused):
     else:
         sys.stderr.write("Error: {}\n", output["error"])
 
-@cli.command(help="Show status information")
-@click.argument('what', nargs=-1)
-@click.option('--daemon', default=False, is_flag=True)
-def status(what, daemon):
-    cwd = os.getcwd() # TODO: See if cwd is a download target
-
-    if len(what) == 0:
-        output = send_action("status")
-        print("scbt is running on pid {} (running for {} seconds)"\
-            .format(output["session"]["pid"], output["session"]["uptime"]))
-        print(":: [{} downloading] [{} seeding] [{} idle]"\
-            .format(output["downloading"], output["seeding"], output["idle"]))
-        print(":: [{} kb/s up] [{} kb/s down] [{} peers] [{} ratio]"\
-            .format(output["session"]["upload_rate"],
-                output["session"]["download_rate"],
-                output["session"]["num_peers"],
-                output["session"]["ratio"]))
-    else:
-        # Show status for what
-        pass
-
-@cli.command(help="List torrents loaded on daemon")
-def list():
-    status = send_action("status")
-    response = send_action("list_torrents")
-    print("[{} downloading] [{} seeding] [{} idle]"\
+def meta_status(status, torrents):
+    print("scbt is running on pid {} (running for {} seconds)"\
+        .format(status["session"]["pid"], status["session"]["uptime"]))
+    print(":: [{} downloading] [{} seeding] [{} idle]"\
         .format(status["downloading"], status["seeding"], status["idle"]))
-    for torrent in response["torrents"]:
+    print(":: [{} kb/s up] [{} kb/s down] [{} peers] [{:.2f} ratio]"\
+        .format(status["session"]["upload_rate"],
+            status["session"]["download_rate"],
+            status["session"]["num_peers"],
+            status["session"]["ratio"]))
+    for torrent in torrents["torrents"]:
         print("")
         print("{}".format(torrent["name"]))
         state = torrent["state"]
@@ -82,6 +65,20 @@ def list():
             else:
                 sys.stdout.write(" ")
         sys.stdout.write("]\n")
+
+@cli.command(help="Show status information")
+@click.argument('what', nargs=-1)
+@click.option('--daemon', default=False, is_flag=True)
+def status(what, daemon):
+    cwd = os.getcwd() # TODO: See if cwd is a download target
+    status = send_action("status")
+    torrents = send_action("list_torrents")
+
+    if len(what) == 0:
+        meta_status(status, torrents)
+    else:
+        # what_status(status, torrents) # TODO
+        pass
 
 if __name__ == '__main__':
     cli()
